@@ -1,0 +1,102 @@
+<! -- -*- tcl -*-
+   -->
+<html><head>
+<title>define - Package Stubs </title>
+
+            <!-- meta -->
+            <link rel="stylesheet" href="manpage.css">
+        
+</head>
+<! -- Generated from file './define.man' by tcllib/doctools with format 'html2'
+   -->
+<! -- CVS: $Id: define.html,v 1.1.1.1 2004-07-20 17:22:56 robert_seeger Exp $ define.n
+   -->
+
+<body>
+
+            <!-- header -->
+            <div class="body">
+        
+<h1> define(n) 1.0 doc &quot;Package Stubs&quot;</h1>
+
+<h2><a name="name">NAME</a></h2>
+<p>
+<p> define - Define a stub (or group of stubs) that can be used later
+
+
+
+<h2><a name="tableofcontents">TABLE OF CONTENTS</a></h2>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tableofcontents">TABLE OF CONTENTS</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#synopsis">SYNOPSIS</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#description">DESCRIPTION</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#seealso">SEE ALSO</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#keywords">KEYWORDS</a><br>
+<h2><a name="synopsis">SYNOPSIS</a></h2>
+<p>
+<table border=1 width=100% cellspacing=0 cellpadding=0><tr            bgcolor=lightyellow><td bgcolor=lightyellow><table 0 width=100% cellspacing=0 cellpadding=0><tr valign=top ><td ><a href="#1"><b class='cmd'>::stubs::define stub</b> <i class='arg'>type</i> <i class='arg'>name</i> ?<i class='arg'>value</i>?</a></td></tr>
+<tr valign=top ><td ><a href="#2"><b class='cmd'>::stubs::define group</b> <i class='arg'>name</i> <i class='arg'>script</i></a></td></tr>
+</table></td></tr></table>
+
+<h2><a name="description">DESCRIPTION</a></h2>
+<p>
+<p>
+
+The <b class='cmd'>define</b> command is used to define a stub, or group
+of stubs, that can then be used later via the <b class='cmd'>stub defined</b>
+functionality.
+
+<dl>
+ 
+<dt><a name="1"><b class='cmd'>::stubs::define stub</b> <i class='arg'>type</i> <i class='arg'>name</i> ?<i class='arg'>value</i>?</a><dd>
+
+
+Defines a stub for a command, that can later be put into place
+using <b class='cmd'>stub defined</b>. It is generally used for simple
+commands that will be <b class='cmd'>stub</b>bed out multiple times.
+
+<p><pre class="example">
+% ::stubs::define stub ensemble clock seconds { return 0 }
+% clock format 1089586778 -format %D -gmt 1
+07/11/04
+% ::stubs::stub defined clock
+% clock format 1089586778 -format %D -gmt 1
+01/01/70
+</pre></p>
+
+<br><br>
+<dt><a name="2"><b class='cmd'>::stubs::define group</b> <i class='arg'>name</i> <i class='arg'>script</i></a><dd>
+
+
+Defines a stub group and the script to run when it is <b class='cmd'>stub</b>bed
+via <b class='cmd'>stub group</b>.
+
+<p><pre class="example">
+% ::stubs::define group mygroup {
+    stubs::stub proc firstCommand {} { return first }
+    stubs::stub proc secondCommand {} { return [incr ::mygroupcounter] }
+    set mygroupcounter 0
+}
+% ::stubs::stub group mygroup
+% firstCommand
+first
+% secondCommand
+1
+% secondCommand
+2
+</pre></p>
+
+</dl>
+
+
+
+
+
+
+<h2><a name="seealso">SEE ALSO</a></h2>
+<p>
+<a href="chain.html">chain(n)</a>, <a href="loadStubs.html">loadStubs(n)</a>, <a href="stub.html">stub(n)</a>, <a href="stubs.html">stubs(n)</a>, <a href="unstub.html">unstub(n)</a>, tcltest(n)
+
+<h2><a name="keywords">KEYWORDS</a></h2>
+<p>
+stubs, tcltest, test
+
+            <!-- footer -->
+            </div>
+        
+</body></html>

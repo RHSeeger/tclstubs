@@ -1,0 +1,601 @@
+#
+# $Header: /home/rhseeger/svn/tclstubs-cvsbackup/tclstubs/tests/stubs.integration.test,v 1.2 2004-12-20 05:19:24 robert_seeger Exp $
+#
+#     Integration tests for stubs.tcl
+#
+# Copyright (c) 2004 Robert Seeger <robert_seeger@users.sourceforge.net>
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+source [file join [file dirname [file dirname [info script]]] tcl stubs.tcl]
+
+package require tcltest
+namespace import -force tcltest::*
+
+namespace import stubs::*
+
+# ========================================
+test namespace.join-1.1 {
+    Join namespaces
+} -body {
+    ::stubs::namespace.join :: bob::joe
+} -result {::bob::joe}
+
+test namespace.join-1.2 {
+    No root namespace
+} -body {
+    ::stubs::namespace.join bob joe steve
+} -result {bob::joe::steve}
+
+# ========================================
+test stub-value-1.1 {
+    Return a value when the proc is called
+} -body {
+    stub value stub.value-1.1 value-1.1
+    set result [list [info args stub.value-1.1] [info body stub.value-1.1]]
+    unstub stub.value-1.1
+    set result
+} -result {args { return value-1.1 }}
+
+test stub-value-1.2 {
+    Return a value when the proc is called with args
+} -body {
+    stub value stub.value-1.2 value-1.2
+    list [info args stub.value-1.2] [info body stub.value-1.2]
+} -result {args { return value-1.2 }}
+
+test stub-value-1.3 {
+    Make sure we can stub the same proc more than once\
+        and still retain all the information involved
+} -setup {
+    set result {}
+} -body {
+    proc stub.value-1.3 { arg1 arg2 } { v1 }
+    stub value stub.value-1.3 v2
+    lappend result [info args stub.value-1.3] [info body stub.value-1.3]
+    stub value stub.value-1.3 v3
+    lappend result [info args stub.value-1.3] [info body stub.value-1.3]
+    unstub
+    lappend result [info args stub.value-1.3] [info body stub.value-1.3]
+    set result
+} -result {args { return v2 } args { return v3 } {arg1 arg2} { v1 }}
+
+test stub-value-1.4 {
+    Make sure the value we return can be a list
+} -body {
+    stub value stub.value-1.4 [list value-1.4.1 value-1.4.2]
+    list [info args stub.value-1.4] [info body stub.value-1.4]
+} -result {args { return {value-1.4.1 value-1.4.2} }}
+
+# ========================================
+test stub-alias-1.1 {
+    Call a different proc when the proc is called
+} -body {
+    stub alias stub.alias-1.1 stub.alias-1.1.aproc
+    interp alias {} stub.alias-1.1
+} -result {stub.alias-1.1.aproc}
+
+test stub-alias-1.2 {
+    Call a different proc when the proc is called with args
+} -body {
+    stub alias stub.alias-1.2 stub.alias-1.2.aproc
+    interp alias {} stub.alias-1.2
+} -result {stub.alias-1.2.aproc}
+
+test stub-alias-1.3 {
+    Call a different proc when the proc is called with\
+        args that do not match those of the proc aliased to
+} -body {
+    stub alias stub.alias-1.3 stub.alias-1.3.aproc
+    interp alias {} stub.alias-1.3
+} -result {stub.alias-1.3.aproc}
+
+test stub-alias-1.4 {
+    Make sure we can pass in extra arguments to the alias
+} -body {
+    stub alias stub.alias-1.4 stub.alias-1.4.aproc aval1 aval2
+    interp alias {} stub.alias-1.4
+} -result {stub.alias-1.4.aproc aval1 aval2}
+
+test stub-alias-1.5 {
+    Make sure we can pass in extra arguments to the alias with spaces
+} -body {
+    stub alias stub.alias-1.5 stub.alias-1.5.aproc {aval1 aval2}
+    interp alias {} stub.alias-1.5
+} -result {stub.alias-1.5.aproc {aval1 aval2}}
+
+# ========================================
+test stub-proc-1.1 {
+    Call a different proc when the proc is called
+} -body {
+    stub proc stub.proc-1.1 {} { return 5 }
+    list [info args stub.proc-1.1] [info body stub.proc-1.1]
+} -result {{} { return 5 }}
+
+test stub-proc-1.2 {
+    Make sure we can pass in args
+} -body {
+    stub proc stub.proc-1.2 {a b} { return 15 }
+    list [info args stub.proc-1.2] [info body stub.proc-1.2]
+} -result {{a b} { return 15 }}
+
+# ========================================
+test stub-ensemble-1.1 {
+} -body {
+    stub ensemble clock seconds { return 0 }
+    clock seconds
+} -result {0}
+
+test stub-ensemble-1.2 {
+    Make sure we can unstub an ensemble
+} -setup {
+    set result {}
+    catch {stubs::unstub}
+} -body {
+    stub ensemble clock seconds { return 0 }
+    lappend result [clock seconds]
+    stubs::stubEnsemble clock format { return 1 }
+    lappend result [clock format]
+    stubs::unstub
+    lappend result [clock format [clock seconds] -format "AValue"]
+    lappend result [expr {[clock seconds] > 0} ]
+} -result {0 1 AValue 1}
+
+test stub-ensemble-1.3 {
+    Stub multiple subcommands at once
+} -setup {
+    proc stub-ensemble-1.3 {subc args} {
+        list original $args
+    }
+} -body {
+    stub ensemble stub-ensemble-1.3 sub1 {
+        list first $args
+    } sub2 {
+        list second $args
+    }
+    list [stub-ensemble-1.3 sub0 a b] \
+        [stub-ensemble-1.3 sub1 c d] \
+        [stub-ensemble-1.3 sub2 e f] 
+} -result {{original {a b}} {first {c d}} {second {e f}}}
+
+# ========================================
+test unstub-proc-1.1 {
+    Stub a proc and then unstub it
+} -setup {
+    set result {}
+} -body {
+    proc unstub-proc-1.1 {a b c} { return original }
+    stub proc unstub-proc-1.1 {a b} { return stubbed }
+    lappend result \
+        [list [info args unstub-proc-1.1] [info body unstub-proc-1.1]]
+    unstub unstub-proc-1.1
+    lappend result \
+        [list [info args unstub-proc-1.1] [info body unstub-proc-1.1]]
+    set result
+} -result {{{a b} { return stubbed }} {{a b c} { return original }}}
+
+test unstub-proc-1.2 {
+    Stub a proc twice and then unstub it
+} -setup {
+    set result {}
+} -body {
+    proc unstub-proc-1.2 {a b c} { return original }
+    stub proc unstub-proc-1.2 {a b} { return stubbed }
+    lappend result \
+        [list [info args unstub-proc-1.2] [info body unstub-proc-1.2]]
+    stub proc unstub-proc-1.2 {a} { return "stubbed again" }
+    lappend result \
+        [list [info args unstub-proc-1.2] [info body unstub-proc-1.2]]
+
+    unstub unstub-proc-1.2
+    lappend result \
+        [list [info args unstub-proc-1.2] [info body unstub-proc-1.2]]
+    set result
+} -result {{{a b} { return stubbed }} {a { return "stubbed again" }} {{a b c} { return original }}}
+
+# ========================================
+test unstub-alias-1.1 {
+    Stub a alias and then unstub it
+} -setup {
+    set result {}
+    proc unstub-alias-1.1 {a b c} { list original [expr {$a + $b + $c}] }
+    proc replace1 {a b} { list stubbed [expr {$a + $b}] }
+} -body {
+    stub alias unstub-alias-1.1 replace1
+    lappend result [list [interp alias {} unstub-alias-1.1] \
+            [unstub-alias-1.1 1 2]]
+
+    unstub unstub-alias-1.1
+    lappend result [list [interp alias {} unstub-alias-1.1] \
+            [unstub-alias-1.1 1 2 3]]
+
+    set result
+} -result {{replace1 {stubbed 3}} {{} {original 6}}}
+
+test unstub-alias-1.2 {
+    Stub a alias twice and then unstub it
+} -setup {
+    set result {}
+    proc unstub-alias-1.2 {a b c} { list original [expr {$a + $b + $c}] }
+    proc replace1 {a b} { list stubbed [expr {$a + $b}] }
+    proc replace2 {a} { list "stubbed again" $a }
+} -body {
+    stub alias unstub-alias-1.2 replace1
+    lappend result [list [interp alias {} unstub-alias-1.2] \
+            [unstub-alias-1.2 1 2]]
+
+    stub alias unstub-alias-1.2 replace2
+    lappend result [list [interp alias {} unstub-alias-1.2] \
+            [unstub-alias-1.2 1]]
+
+    unstub unstub-alias-1.2
+    lappend result [list [interp alias {} unstub-alias-1.2] \
+            [unstub-alias-1.2 1 2 3]]
+
+    set result
+} -result {{replace1 {stubbed 3}} {replace2 {{stubbed again} 1}} {{} {original 6}}}
+
+# ========================================
+test unstub-value-1.1 {
+    Stub a value, then unstub it
+} -setup {
+    set result {}
+} -body {
+    proc unstub-value-1.1 {} { return 1 }
+    stub value unstub-value-1.1 replace1
+    lappend result [unstub-value-1.1]
+
+    unstub unstub-value-1.1
+    lappend result [unstub-value-1.1]
+
+    set result
+} -result {replace1 1}
+
+
+test unstub-value-1.2 {
+    Stub a value twice, then unstub it
+} -setup {
+    set result {}
+    proc unstub-value-1.2 {} { return 1 }
+} -body {
+    stub value unstub-value-1.2 replace1
+    lappend result [unstub-value-1.2]
+
+    stub value unstub-value-1.2 replace2
+    lappend result [unstub-value-1.2]
+
+    unstub unstub-value-1.2
+    lappend result [unstub-value-1.2]
+
+    set result
+} -result {replace1 replace2 1}
+
+
+# ========================================
+test unstub-ensemble-1.1 {
+    Stub a ensemble, then unstub it
+} -setup {
+    set result {}
+    proc stub-ensemble-1.1 {subC args} { list Original $subC $args }
+} -body {
+    stub ensemble stub-ensemble-1.1 subCommand2 { 
+        list Replaced $args 
+    }
+    lappend result [stub-ensemble-1.1 subCommand1 a b c]
+    lappend result [stub-ensemble-1.1 subCommand2 a b c]
+
+    unstub stub-ensemble-1.1
+    lappend result [stub-ensemble-1.1 subCommand1 a b c]
+    lappend result [stub-ensemble-1.1 subCommand2 a b c]
+
+    set result
+} -result {{Original subCommand1 {a b c}} {Replaced {a b c}} {Original subCommand1 {a b c}} {Original subCommand2 {a b c}}}
+
+
+test unstub-ensemble-1.2 {
+    Stub a ensemble twice, then unstub it
+}
+
+# ========================================
+test loadStubs-1.1 {
+    Load a file by its full filename
+} -setup {
+    set loadStubs-1.1-data 0
+    makeFile {set loadStubs-1.1-data 1} /tmp/loadStubs-1.1-file
+} -body {
+    loadStubs /tmp/loadStubs-1.1-file
+    set loadStubs-1.1-data
+} -cleanup {
+} -result {1}
+
+test loadStubs-1.2 {
+    Load a file by its short name, let the loader find it
+} -setup {
+    rename source old_source
+    set loadStubs-1.2-data ""
+    proc source {file} { set ::loadStubs-1.2-data $file }
+    makeFile {} ./stubs.loadStubs-1.2-file.tcl
+    set olddirlist [set ::stubs::libpaths]
+    set ::stubs::libpaths [list [pwd]]
+} -body {
+    loadStubs loadStubs-1.2-file
+    set loadStubs-1.2-data
+} -cleanup {
+    set ::stubs::libpaths $olddirlist
+    rename source {}
+    rename old_source source
+} -result [file join [file normalize .] stubs.loadStubs-1.2-file.tcl]
+
+test loadStubs-1.3 {
+    Make sure we don't load the file twice
+} -setup {
+    set filename ./stubs.loadStubs-1.3-file.tcl
+    makeFile {incr loadStubs-1.3-value} $filename
+    set loadStubs-1.3-value 0
+} -body {
+    stubs::loadStubs $filename
+    stubs::loadStubs $filename
+    set loadStubs-1.3-value
+} -result {1}
+
+test loadStubs-1.4 {
+    The -force flag forces a load of the file, even if\
+        it has already been loaded
+} -setup {
+    set filename ./stubs.loadStubs-1.4-file.tcl
+    makeFile {incr loadStubs-1.4-value} $filename
+    set loadStubs-1.4-value 0
+} -body {
+    stubs::loadStubs $filename
+    stubs::loadStubs -force $filename
+    set loadStubs-1.4-value
+} -result {2}
+
+test loadStubs-2.1 {
+    Throw an error if the file can't be found
+} -setup {
+    set olddirlist [set ::stubs::libpaths]
+    set ::stubs::libpaths [list [pwd]]
+} -body {
+    loadStubs loadStubs-2.1-file
+} -cleanup {
+    set ::stubs::libpaths $olddirlist
+} -returnCodes error -result {Could not find module: loadStubs-2.1-file}
+
+
+# ========================================
+test defineStub-1.1 {
+    Define the commands to stub a command, for a proc stub
+} -body {
+    define stub proc defineStub-1.1 {a b c} { list $a $b $c }
+    stub defined defineStub-1.1
+    defineStub-1.1 1 2 3
+} -cleanup {
+    unstub
+} -result {1 2 3}
+
+test defineStub-1.2 {
+    Define the commands to stub a command, for a value stub
+} -body {
+    define stub value defineStub-1.2 value-1.2
+    stub defined defineStub-1.2
+    defineStub-1.2
+} -cleanup {
+    unstub
+} -result {value-1.2}
+
+test defineStub-1.3 {
+    Define the commands to stub a command, for an alias stub
+} -body {
+    define stub alias defineStub-1.3 list
+    stub defined defineStub-1.3
+    defineStub-1.3 1 2 3 4
+} -cleanup {
+    unstub
+} -result {1 2 3 4}
+
+test defineStub-1.4 {
+    Define the commands to stub a command, for an ensemble stub
+} -setup {
+    proc defineStub-1.4 {subc args} {
+        list original $subc $args
+    }
+} -body {
+    define stub ensemble defineStub-1.4 sub1 {
+        list stub1 one $args 
+    } sub2 {
+        list stub2 two $args
+    }
+    stub defined defineStub-1.4
+    list [defineStub-1.4 sub0 1 2] [defineStub-1.4 sub1 3 4] [defineStub-1.4 sub2 5 6]
+} -cleanup {
+    unstub
+} -result {{original sub0 {1 2}} {stub1 one {3 4}} {stub2 two {5 6}}}
+
+test stub-defined-2.1 {
+    Run the commands to stub a defined command
+} -body {
+    stub defined defineStub-2.1
+} -returnCodes error -result "Stub defineStub-2.1 is not defined"
+
+test define-group-1.1 {
+    Define the commands to stub a group of commands
+} -setup {
+    set retval {}
+} -body {
+    define group def-group-1.1 {
+        stub proc def-g-p-1.1 {a b c} { list $a $b $c }
+        stub value def-g-v-1.1 value1
+        return definedValue
+    }
+    lappend retval [stub group def-group-1.1]
+    lappend retval [def-g-p-1.1 1 2 3]
+    lappend retval [def-g-v-1.1 4 5 6]
+    unstub
+    set retval
+} -result {definedValue {1 2 3} value1}
+
+test stub-group-2.1 {
+    Throw an error if the group isn't defined
+} -body {
+    stub group stub-group-2.1
+} -returnCodes error -result {Stub group stub-group-2.1 is not defined}
+
+# ========================================
+test chain-1.1 {
+    Call the proc that existed prior to this stub being set
+} -body {
+    proc chain-1.1 {} { return 1 }
+    stub proc chain-1.1 {} { list 2 [chain] }
+    chain-1.1
+} -cleanup {
+    unstub
+} -result {2 1}
+
+test chain-1.2 {
+    Call the proc that existed prior to this stub being set\
+        with arguments
+} -body {
+    proc chain-1.2 {args} { return $args }
+    stub proc chain-1.2 {} { list 2 [chain a b c] }
+    chain-1.2
+} -cleanup {
+    unstub
+} -result {2 {a b c}}
+
+test chain-1.3 {
+    Chain with something that has been stubbed multiple times
+} -body {
+    proc chain-1.3 {} { return A }
+    stub proc chain-1.3 {} { list B }
+    stub proc chain-1.3 {} { list C [chain] }
+    chain-1.3
+} -cleanup {
+    unstub
+} -result {C B}
+
+test chain-1.4 {
+    Chain with something that has been stubbed multiple times,\
+        and chain both times
+} -body {
+    proc chain-1.4 {} { return A }
+    stub proc chain-1.4 {} { list B [chain] }
+    stub proc chain-1.4 {} { list C [chain] }
+    chain-1.4
+} -cleanup {
+    unstub
+} -result {C {B A}}
+
+test chain-1.5 {
+    Make sure we don't access old chain data
+} -setup {
+    set result {}
+} -body {
+    proc chain-1.5 {} { return A }
+    stub proc chain-1.5 {} { list B [chain] }
+    stub proc chain-1.5 {} { list C [chain] }
+    lappend result [chain-1.5]
+    unstub
+    stub proc chain-1.5 {} { list D [chain] }
+    stub proc chain-1.5 {} { list E [chain] }
+    lappend result [chain-1.5]
+} -cleanup {
+    unstub
+} -result {{C {B A}} {E {D A}}}
+
+test chain-2.1 {
+    Throw an error if called from within an unstubbed proc
+} -body {
+    proc chain-2.1 {} { chain }
+    chain-2.1
+} -returnCodes error -result {Cannot chain from within an unstubbed proc}
+
+test chain-2.2 {
+    Throw an error if called from the global scope
+} -body {
+    chain
+} -returnCodes error -result {Cannot chain from the global scope}
+
+test chain-3.1 {
+    Make sure we don't leave any internal data lying around
+} -setup {
+    set result {}
+} -body {
+    proc chain-1.5 {} { return A }
+    stub proc chain-1.5 {} { list B [chain] }
+    stub proc chain-1.5 {} { list C [chain] }
+    chain-1.5
+    set oldprocs [set ::stubs::stubProcs(::chain-1.5)]
+    unstub
+    lappend result [info exists ::stubs::stubProcs(::chain-1.5)]
+    foreach elem $oldprocs {
+        lappend result [info exists ::stubs::stubStubs($elem)]
+    }
+
+    set result
+} -result {0 0 0}
+
+# ========================================
+# Bug 1085169 : 
+# https://sourceforge.net/tracker/index.php?func=detail&aid=1085169&group_id=114735&atid=669286
+
+test stubs-1.1 {
+    fail example 1 - stubbed proc lives in wrong namespace
+} -setup {
+    namespace eval foo {
+        interp alias {} ::foo::typevariable {} ::variable
+        
+        typevariable t 5
+        
+        proc bar {} {
+            # puts "ns: [namespace current]"
+            # puts "info level 1 == [info level 1]"
+            typevariable t
+            return $t
+        }
+    }
+} -body {
+    ::stubs::stub proc foo::bar {} {::stubs::chain}
+    ::foo::bar
+} -cleanup {
+    ::stubs::unstub ::foo::bar
+    namespace delete foo
+} -result 5
+
+#
+# stubs-1.2
+#
+test stubs-1.2 {
+    fail example 2 - incorrectly stored proc name - should be fully qualified
+} -setup {
+    namespace eval foo {
+        interp alias {} ::foo::typevariable {} ::variable
+
+        typevariable t 5
+        
+        proc bar {} {
+            # puts "ns: [namespace current]"
+            # puts "info level 1 == [info level 1]"
+            typevariable t
+            return $t
+        }
+    }
+} -body {
+    # note use of foo::bar rather than ::foo::bar (resolves to same fully qualified proc name so should work)
+    # this will work if you use ::foo::bar here.
+    ::stubs::stub proc foo::bar {} {::stubs::chain}
+    ::foo::bar
+} -cleanup {
+    ::stubs::unstub ::foo::bar
+    namespace delete foo
+} -result 5
+
+
+# problem: stub proc name must be fully qualified foo::bar does not chain but ::foo::bar does in 1.4
+
+
+
+# ========================================
+cleanupTests

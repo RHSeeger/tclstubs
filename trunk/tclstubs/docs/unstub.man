@@ -1,0 +1,27 @@
+[comment {-*- tcl -*-}]
+[manpage_begin unstub n 1.1]
+[moddesc   {Package Stubs}]
+[titledesc {Return stubbed commands back to their orignal definitions}]
+[description]
+[para]
+
+The [cmd unstub] command is used to return a command previously
+defined/redefined via [cmd stub] back to its original definition.
+Given a command name, it returns the named command back to the
+definition it had (none, if it did not exist) before it was 
+[cmd stub]bed. If the command name is omitted, all commands that
+are currently [cmd stub]bed are [cmd unstub]bed.
+
+[usage [cmd ::stubs::unstub] [opt [arg commandName]]]
+
+[see_also \
+        [uri stubs.html stubs(n)] \
+        [uri stub.html stub(n)] \
+        [uri define.html define(n)] \
+        [uri chain.html chain(n)] \
+        [uri loadStubs.html loadStubs(n)] \
+        tcltest(n)]
+
+[keywords stubs test tcltest]
+
+[manpage_end]

@@ -1,0 +1,43 @@
+[comment {-*- tcl -*-}]
+[manpage_begin chain n 1.0]
+[moddesc   {Package Stubs}]
+[titledesc {Call the previous definition of a command}]
+[description]
+[para]
+
+The [cmd chain] command is used to call the previous
+definition of a command. This can be used if a stub
+definition needs to modify the input or output of a
+command. If used outside of a stub, it throws an error.
+
+The chain command already does an [cmd uplevel] to make
+sure that it runs at the same level the original command
+was run at.
+
+[usage [cmd ::stubs::unstub] [opt [arg commandName]]]
+
+[section EXAMPLES]
+
+[example_begin]
+% array set testArr {c 10 a 11 d 15 b 1}
+% array names testArr
+d a b c
+% stubs::stub ensemble array names {
+    # sort the names before returning them
+    return [lb]lsort [lb]eval [lb]linsert $args 0 ::stubs::chain names[rb][rb][rb]
+}
+% array names testArr
+a b c d
+[example_end]
+
+[see_also \
+        [uri stubs.html stubs(n)] \
+        [uri stub.html stub(n)] \
+        [uri unstub.html unstub(n)] \
+        [uri define.html define(n)] \
+        [uri loadStubs.html loadStubs(n)] \
+        tcltest(n)]
+
+[keywords stubs test tcltest]
+
+[manpage_end]

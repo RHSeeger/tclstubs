@@ -1,0 +1,58 @@
+[comment {-*- tcl -*-}]
+[manpage_begin loadStubs n 1.0]
+[moddesc   {Package Stubs}]
+[titledesc {Load in stub definitions}]
+[description]
+[para]
+
+The [cmd loadStubs] command is used to load in stub
+definitions stored in a file. It can take either a module
+name, or an absolute file name. When given a module name,
+it searches several directories for a file by the name
+of [file "stubs.<module>.tcl"].
+
+[para]
+
+The list of directories searched for modules is stored in
+[var ::stubs::libpaths], which is originally set the location
+of the stubs tcl file.
+
+[usage [cmd ::stubs::loadStubs] [arg "module or file name"]]
+
+[section EXAMPLES]
+
+[example_begin]
+% set fd [lb]open [lb]file join $::stubs::libpaths stubs.testmodule.tcl[rb] w[rb]
+% puts $fd {
+stubs::define stub proc testStub {} { return testWorked }
+}
+% close $fd
+% stubs::loadStubs testmodule
+% stubs::stub defined testStub
+% testStub
+testWorked
+[example_end]
+
+[example_begin]
+% set fd [lb]open [lb]file join /tmp stubs.testmodule.tcl[rb] w[rb]
+% puts $fd {
+stubs::define stub proc testStub {} { return testWorked }
+}
+% close $fd
+% stubs::loadStubs /tmp/stubs.testmodule.tcl
+% stubs::stub defined testStub
+% testStub
+testWorked
+[example_end]
+
+[see_also \
+        [uri stubs.html stubs(n)] \
+        [uri stub.html stubs(n)] \
+        [uri unstub.html unstub(n)] \
+        [uri define.html define(n)] \
+        [uri chain.html chain(n)] \
+        tcltest(n)]
+
+[keywords stubs test tcltest]
+
+[manpage_end]

@@ -1,0 +1,97 @@
+<! -- -*- tcl -*-
+   -->
+<html><head>
+<title>loadStubs - Package Stubs </title>
+
+            <!-- meta -->
+            <link rel="stylesheet" href="manpage.css">
+        
+</head>
+<! -- Generated from file './loadStubs.man' by tcllib/doctools with format 'html2'
+   -->
+<! -- CVS: $Id: loadStubs.html,v 1.1.1.1 2004-07-20 17:22:56 robert_seeger Exp $ loadStubs.n
+   -->
+
+<body>
+
+            <!-- header -->
+            <div class="body">
+        
+<h1> loadStubs(n) 1.0 doc &quot;Package Stubs&quot;</h1>
+
+<h2><a name="name">NAME</a></h2>
+<p>
+<p> loadStubs - Load in stub definitions
+
+
+
+<h2><a name="tableofcontents">TABLE OF CONTENTS</a></h2>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tableofcontents">TABLE OF CONTENTS</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#synopsis">SYNOPSIS</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#description">DESCRIPTION</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#examples">EXAMPLES</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#seealso">SEE ALSO</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#keywords">KEYWORDS</a><br>
+<h2><a name="synopsis">SYNOPSIS</a></h2>
+<p>
+<table border=1 width=100% cellspacing=0 cellpadding=0><tr            bgcolor=lightyellow><td bgcolor=lightyellow><table 0 width=100% cellspacing=0 cellpadding=0><tr valign=top ><td ><b class='cmd'>::stubs::loadStubs</b> <i class='arg'>module or file name</i></td></tr>
+</table></td></tr></table>
+
+<h2><a name="description">DESCRIPTION</a></h2>
+<p>
+<p>
+
+The <b class='cmd'>loadStubs</b> command is used to load in stub
+definitions stored in a file. It can take either a module
+name, or an absolute file name. When given a module name,
+it searches several directories for a file by the name
+of &quot;<strong>stubs.&lt;module&gt;.tcl</strong>&quot;.
+
+<p>
+
+The list of directories searched for modules is stored in
+<strong>::stubs::libpaths</strong>, which is originally set the location
+of the stubs tcl file.
+
+
+
+
+<h2><a name="examples">EXAMPLES</a></h2>
+<p>
+
+<p><pre class="example">
+% set fd [open [file join $::stubs::libpaths stubs.testmodule.tcl] w]
+% puts $fd {
+stubs::define stub proc testStub {} { return testWorked }
+}
+% close $fd
+% stubs::loadStubs testmodule
+% stubs::stub defined testStub
+% testStub
+testWorked
+</pre></p>
+
+<p><pre class="example">
+% set fd [open [file join /tmp stubs.testmodule.tcl] w]
+% puts $fd {
+stubs::define stub proc testStub {} { return testWorked }
+}
+% close $fd
+% stubs::loadStubs /tmp/stubs.testmodule.tcl
+% stubs::stub defined testStub
+% testStub
+testWorked
+</pre></p>
+
+
+
+
+
+
+<h2><a name="seealso">SEE ALSO</a></h2>
+<p>
+<a href="chain.html">chain(n)</a>, <a href="define.html">define(n)</a>, <a href="stub.html">stubs(n)</a>, <a href="stubs.html">stubs(n)</a>, <a href="unstub.html">unstub(n)</a>, tcltest(n)
+
+<h2><a name="keywords">KEYWORDS</a></h2>
+<p>
+stubs, tcltest, test
+
+            <!-- footer -->
+            </div>
+        
+</body></html>

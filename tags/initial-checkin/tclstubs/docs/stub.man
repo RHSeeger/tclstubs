@@ -1,0 +1,101 @@
+[comment {-*- tcl -*-}]
+[manpage_begin stub n 1.0]
+[moddesc   {Package Stubs}]
+[titledesc {Temporarily define/redefine Tcl commands}]
+[description]
+[para]
+
+The [cmd stub] command is used to replace (or create) a
+command temporarily. 
+
+[list_begin definitions]
+ 
+[call [cmd "::stubs::stub value"] [arg name] [arg value]]
+
+Replaces the command with one that accepts any number of
+arguments and returns a static value. 
+
+[example_begin]
+% ::stubs::stub value myProc 15
+% myProc
+15
+[example_end]
+
+[call [cmd "::stubs::stub alias"] [arg name] [opt [arg args]]]
+
+Replaces the command with an alias to the specified
+command. The optional arguments are passed into the
+aliased command just like a normal alias.
+
+[example_begin]
+% ::stubs::stub alias myProc list 1 2
+% myProc a b
+1 2 a b
+[example_end]
+
+[call [cmd "::stubs::stub proc"] [arg name] [arg arglist] [arg body]]
+
+Replaces the command with the specified command
+definition, just as if defined via [cmd proc].
+
+[example_begin]
+% ::stubs::stub proc myProc {a b c} {
+    eval {$a + $b + $c}
+}
+% myProc 1 2 3
+6
+[example_end]
+
+
+[call [cmd "::stubs::stub ensemble"] [arg name] [arg subcommand] [arg script] \
+        [opt [arg subcommand]] [opt [arg script]] [opt [arg ...]]]
+
+Redefines the actions for certain subcommands of the
+specified command. Can be used in cases where only
+certain parts of a command need to be overridden, such
+as [cmd "clock seconds"]. Multiple subcommands of the
+same command can be overridden in one stub.
+
+[example_begin]
+% ::stubs::stub ensemble clock seconds { return 0 }
+% clock seconds
+0
+% clock format [clock seconds] -format "%D" -gmt 1
+01/01/70
+[example_end]
+
+
+[call [cmd "::stubs::stub defined"] [arg name]]
+
+Replaces the command with its stub, as defined via 
+[cmd "stubs::define stub"].
+
+[example_begin]
+% # Replace array with the builtin version
+% # that lsorts 'array names' and 'array get'
+% # before returning them
+% ::stubs::stub defined array
+% array set testArray {c 3 d 4 a 1 b 2}
+% array names testArray
+a b c d
+[example_end]
+
+
+[call [cmd "::stubs::stub group"] [arg name]]
+
+Calls the script for the named stub group. This is generally
+used to stub a variety of related procedures at once.
+
+[list_end]
+
+[see_also \
+        [uri stubs.html stubs(n)] \
+        [uri unstub.html unstub(n)] \
+        [uri define.html define(n)] \
+        [uri chain.html chain(n)] \
+        [uri loadStubs.html loadStubs(n)] \
+        tcltest(n)]
+
+[keywords stubs test tcltest]
+
+[manpage_end]

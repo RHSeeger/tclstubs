@@ -1,0 +1,153 @@
+<! -- -*- tcl -*-
+   -->
+<html><head>
+<title>stub - Package Stubs </title>
+
+            <!-- meta -->
+            <link rel="stylesheet" href="manpage.css">
+        
+</head>
+<! -- Generated from file './stub.man' by tcllib/doctools with format 'html2'
+   -->
+<! -- CVS: $Id: stub.html,v 1.2 2004-12-20 05:23:43 robert_seeger Exp $ stub.n
+   -->
+
+<body>
+
+            <!-- header -->
+            <div class="body">
+        
+<h1> stub(n) 1.1 doc &quot;Package Stubs&quot;</h1>
+
+<h2><a name="name">NAME</a></h2>
+<p>
+<p> stub - Temporarily define/redefine Tcl commands
+
+
+
+<h2><a name="tableofcontents">TABLE OF CONTENTS</a></h2>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tableofcontents">TABLE OF CONTENTS</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#synopsis">SYNOPSIS</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#description">DESCRIPTION</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#seealso">SEE ALSO</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#keywords">KEYWORDS</a><br>
+<h2><a name="synopsis">SYNOPSIS</a></h2>
+<p>
+<table border=1 width=100% cellspacing=0 cellpadding=0><tr            bgcolor=lightyellow><td bgcolor=lightyellow><table 0 width=100% cellspacing=0 cellpadding=0><tr valign=top ><td ><a href="#1"><b class='cmd'>::stubs::stub value</b> <i class='arg'>name</i> <i class='arg'>value</i></a></td></tr>
+<tr valign=top ><td ><a href="#2"><b class='cmd'>::stubs::stub alias</b> <i class='arg'>name</i> ?<i class='arg'>args</i>?</a></td></tr>
+<tr valign=top ><td ><a href="#3"><b class='cmd'>::stubs::stub proc</b> <i class='arg'>name</i> <i class='arg'>arglist</i> <i class='arg'>body</i></a></td></tr>
+<tr valign=top ><td ><a href="#4"><b class='cmd'>::stubs::stub ensemble</b> <i class='arg'>name</i> <i class='arg'>subcommand</i> <i class='arg'>script</i> ?<i class='arg'>subcommand</i>? ?<i class='arg'>script</i>? ?<i class='arg'>...</i>?</a></td></tr>
+<tr valign=top ><td ><a href="#5"><b class='cmd'>::stubs::stub defined</b> <i class='arg'>name</i></a></td></tr>
+<tr valign=top ><td ><a href="#6"><b class='cmd'>::stubs::stub group</b> <i class='arg'>name</i></a></td></tr>
+</table></td></tr></table>
+
+<h2><a name="description">DESCRIPTION</a></h2>
+<p>
+<p>
+
+The <b class='cmd'>stub</b> command is used to replace (or create) a
+command temporarily. 
+
+<dl>
+ 
+<dt><a name="1"><b class='cmd'>::stubs::stub value</b> <i class='arg'>name</i> <i class='arg'>value</i></a><dd>
+
+
+Replaces the command with one that accepts any number of
+arguments and returns a static value. 
+
+<p><pre class="example">
+% ::stubs::stub value myProc 15
+% myProc
+15
+</pre></p>
+
+<br><br>
+<dt><a name="2"><b class='cmd'>::stubs::stub alias</b> <i class='arg'>name</i> ?<i class='arg'>args</i>?</a><dd>
+
+
+Replaces the command with an alias to the specified
+command. The optional arguments are passed into the
+aliased command just like a normal alias.
+
+<p><pre class="example">
+% ::stubs::stub alias myProc list 1 2
+% myProc a b
+1 2 a b
+</pre></p>
+
+<br><br>
+<dt><a name="3"><b class='cmd'>::stubs::stub proc</b> <i class='arg'>name</i> <i class='arg'>arglist</i> <i class='arg'>body</i></a><dd>
+
+
+Replaces the command with the specified command
+definition, just as if defined via <b class='cmd'>proc</b>.
+
+<p><pre class="example">
+% ::stubs::stub proc myProc {a b c} {
+    eval {$a + $b + $c}
+}
+% myProc 1 2 3
+6
+</pre></p>
+
+
+<br><br>
+<dt><a name="4"><b class='cmd'>::stubs::stub ensemble</b> <i class='arg'>name</i> <i class='arg'>subcommand</i> <i class='arg'>script</i> ?<i class='arg'>subcommand</i>? ?<i class='arg'>script</i>? ?<i class='arg'>...</i>?</a><dd>
+
+
+Redefines the actions for certain subcommands of the
+specified command. Can be used in cases where only
+certain parts of a command need to be overridden, such
+as <b class='cmd'>clock seconds</b>. Multiple subcommands of the
+same command can be overridden in one stub.
+
+<p><pre class="example">
+% ::stubs::stub ensemble clock seconds { return 0 }
+% clock seconds
+0
+% clock format 1103523988 -format &quot;%D&quot; -gmt 1
+01/01/70
+</pre></p>
+
+
+<br><br>
+<dt><a name="5"><b class='cmd'>::stubs::stub defined</b> <i class='arg'>name</i></a><dd>
+
+
+Replaces the command with its stub, as defined via 
+<b class='cmd'>stubs::define stub</b>.
+
+<p><pre class="example">
+% # Replace array with the builtin version
+% # that lsorts 'array names' and 'array get'
+% # before returning them
+% ::stubs::stub defined array
+% array set testArray {c 3 d 4 a 1 b 2}
+% array names testArray
+a b c d
+</pre></p>
+
+
+<br><br>
+<dt><a name="6"><b class='cmd'>::stubs::stub group</b> <i class='arg'>name</i></a><dd>
+
+
+Calls the script for the named stub group. This is generally
+used to stub a variety of related procedures at once.
+
+</dl>
+
+
+
+
+
+
+<h2><a name="seealso">SEE ALSO</a></h2>
+<p>
+<a href="chain.html">chain(n)</a>, <a href="define.html">define(n)</a>, <a href="loadStubs.html">loadStubs(n)</a>, <a href="stubs.html">stubs(n)</a>, <a href="unstub.html">unstub(n)</a>, tcltest(n)
+
+<h2><a name="keywords">KEYWORDS</a></h2>
+<p>
+stubs, tcltest, test
+
+            <!-- footer -->
+            </div>
+        
+</body></html>

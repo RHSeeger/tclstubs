@@ -1,0 +1,161 @@
+<! -- -*- tcl -*-
+   -->
+<html><head>
+<title>stubs - Package Stub </title>
+
+            <!-- meta -->
+            <link rel="stylesheet" href="manpage.css">
+        
+</head>
+<! -- Generated from file './stubs.man' by tcllib/doctools with format 'html2'
+   -->
+<! -- CVS: $Id: stubs.html,v 1.2 2004-12-20 05:23:43 robert_seeger Exp $ stubs.n
+   -->
+
+<body>
+
+            <!-- header -->
+            <div class="body">
+        
+<h1> stubs(n) 1.1 doc &quot;Package Stub&quot;</h1>
+
+<h2><a name="name">NAME</a></h2>
+<p>
+<p> stubs - Temporarily define/redefine Tcl commands
+
+
+
+<h2><a name="tableofcontents">TABLE OF CONTENTS</a></h2>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tableofcontents">TABLE OF CONTENTS</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#synopsis">SYNOPSIS</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#description">DESCRIPTION</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#commands">COMMANDS</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#examples">EXAMPLES</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#author">AUTHOR</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#license">LICENSE</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#bugs">BUGS</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#seealso">SEE ALSO</a><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#keywords">KEYWORDS</a><br>
+<h2><a name="synopsis">SYNOPSIS</a></h2>
+<p>
+<table border=1 width=100% cellspacing=0 cellpadding=0><tr            bgcolor=lightyellow><td bgcolor=lightyellow><table 0 width=100% cellspacing=0 cellpadding=0><tr valign=top ><td ><a href="#1"><a href="stub.html"><b class='cmd'>::stubs::stub</b></a> <i class='arg'>option</i> ?<i class='arg'>args</i>?</a></td></tr>
+<tr valign=top ><td ><a href="#2"><a href="unstub.html"><b class='cmd'>::stubs::unstub</b></a> ?<i class='arg'>commandName</i>?</a></td></tr>
+<tr valign=top ><td ><a href="#3"><a href="define.html"><b class='cmd'>::stubs::define</b></a> <i class='arg'>option</i> ?<i class='arg'>args</i>?</a></td></tr>
+<tr valign=top ><td ><a href="#4"><a href="chain.html"><b class='cmd'>::stubs::chain</b></a> ?<i class='arg'>args</i>?</a></td></tr>
+<tr valign=top ><td ><a href="#5"><a href="loadStubs.html"><b class='cmd'>::stubs::loadStubs</b></a> <i class='arg'>moduleOrFile</i></a></td></tr>
+</table></td></tr></table>
+
+<h2><a name="description">DESCRIPTION</a></h2>
+<p>
+<p>
+
+The <strong>stubs</strong>  package implements the functionality
+to temporarily define/redefine Tcl commands for the purposes
+of testing.
+
+
+<h2><a name="commands">COMMANDS</a></h2>
+<p>
+
+<dl>
+
+<dt><a name="1"><a href="stub.html"><b class='cmd'>::stubs::stub</b></a> <i class='arg'>option</i> ?<i class='arg'>args</i>?</a><dd>
+
+
+Temporarily redefine a Tcl command
+
+<br><br>
+<dt><a name="2"><a href="unstub.html"><b class='cmd'>::stubs::unstub</b></a> ?<i class='arg'>commandName</i>?</a><dd>
+
+
+Unstub a stubbed command, returning it to its original definition
+
+<br><br>
+<dt><a name="3"><a href="define.html"><b class='cmd'>::stubs::define</b></a> <i class='arg'>option</i> ?<i class='arg'>args</i>?</a><dd>
+
+
+Define a stub or group definition to be used later.
+
+<br><br>
+<dt><a name="4"><a href="chain.html"><b class='cmd'>::stubs::chain</b></a> ?<i class='arg'>args</i>?</a><dd>
+
+
+Call the previous version of a command from within a stubbed
+command.
+
+<br><br>
+<dt><a name="5"><a href="loadStubs.html"><b class='cmd'>::stubs::loadStubs</b></a> <i class='arg'>moduleOrFile</i></a><dd>
+
+
+Load a stubs module.
+
+</dl>
+
+
+<h2><a name="examples">EXAMPLES</a></h2>
+<p>
+
+<p><pre class="example">
+tcltest::test atestname-1.1 {
+    Do something
+} -setup {
+    stub proc athing {a b} {
+        list $a $b
+    }
+} -body {
+    doSomething
+} -cleanup {
+    unstub
+} -result {aResult}
+</pre></p>
+
+<p>
+
+Replace the <b class='cmd'>clock seconds</b> command, via an ensemble stub,
+and have it return 0. This makes sure the <b class='cmd'>getTimestampGMT</b>
+command that we want to test, which calls <b class='cmd'>clock format</b> and
+<b class='cmd'>clock seconds</b>, returns the timestamp for a specific
+time that we can test against.
+
+<p><pre class="example">
+tcltest::test getTimestampGMT-1.1 {
+    Get a timestamp in GMT
+} -setup {
+    stub ensemble clock seconds { return 0 }
+} -body {
+    getTimestampGMT
+} -cleanup {
+    unstub
+} -result {Thu Jan  1 00:00:00 1970}
+
+</pre></p>
+
+
+
+<h2><a name="author">AUTHOR</a></h2>
+<p>
+ 
+Robert Seeger
+ 
+<p>
+  
+
+<h2><a name="license">LICENSE</a></h2>
+<p>
+
+Tcl License (write more)
+ 
+ 
+
+<h2><a name="bugs">BUGS</a></h2>
+<p>
+ 
+
+
+
+
+
+<h2><a name="seealso">SEE ALSO</a></h2>
+<p>
+<a href="chain.html">chain(n)</a>, <a href="define.html">define(n)</a>, <a href="loadStubs.html">loadStubs(n)</a>, <a href="stub.html">stubs(n)</a>, <a href="unstub.html">unstub(n)</a>, tcltest(n)
+
+<h2><a name="keywords">KEYWORDS</a></h2>
+<p>
+stub, test
+
+            <!-- footer -->
+            </div>
+        
+</body></html>
+ 
