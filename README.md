@@ -1,5 +1,6 @@
-tclstubs
-========
+Imported from:
+    https://sourceforge.net/projects/tclstubs/
+
 Description:
 
 Stubs is a package for the Tcl programming language, intended to make writing
